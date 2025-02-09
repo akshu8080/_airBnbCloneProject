@@ -7,7 +7,8 @@ import com.codingshuttle.airBnb.airBnbCloneProject.exceptions.ResourceNotFoundEx
 import com.codingshuttle.airBnb.airBnbCloneProject.repository.HotelRepository;
 import com.codingshuttle.airBnb.airBnbCloneProject.repository.RoomRepository;
 import jakarta.persistence.Id;
-import lombok.RequiredArgsConstructor;
+ import jakarta.transaction.Transactional;
+ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ public class RoomServiceImpl implements RoomService{
     private final RoomRepository roomrepository;
     private final ModelMapper modelMapper;
     private final HotelRepository hotelRepository;
+    private final InventoryService inventoryService;
 
     @Override
     public RoomDto createNewRoom(Long hotelId,RoomDto roomDto) {
@@ -36,10 +38,12 @@ public class RoomServiceImpl implements RoomService{
         room.setHotel(hotel);
         room = roomrepository.save(room);
 
+       if(hotel.isActive()){
+            inventoryService.initializeRoomForAYear(room);
+       }
         return modelMapper.map(room,RoomDto.class);
 
-        //TODO: create inventory as soon as room is created and hotel is Active
-    }
+     }
 
     @Override
     public List<RoomDto> getAllRoomsInHotel(Long hotelId) {
@@ -65,15 +69,18 @@ public class RoomServiceImpl implements RoomService{
 
 
     @Override
+    @Transactional
     public void deleteRoomById(Long roomId) {
         log.info("Deleting the room with Id: {}",roomId);
-        boolean exists = roomrepository.existsById(roomId);
-        if(!exists){
-             throw  new ResourceNotFoundExceptions("Room Not found with Id: "+roomId);
-        }
+        Room room = roomrepository
+                .findById(roomId)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("Room not found with ID: "+roomId));
+
+
+        inventoryService.deleteFutureInventories(room);
 
         roomrepository.deleteById(roomId);
-        //TODO: delete All future inventory for this room
+
 
 
 
