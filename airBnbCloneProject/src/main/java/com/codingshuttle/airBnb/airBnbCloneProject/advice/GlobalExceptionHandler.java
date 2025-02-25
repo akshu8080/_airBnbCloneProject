@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ResourceNotFoundExceptions.class)
-    public ResponseEntity<ApiResponse> handleResourceNotFound(ResourceNotFoundExceptions exceptions){
+   @ExceptionHandler(ResourceNotFoundExceptions.class)
+    public ResponseEntity<ApiResponse<?>> handleResourceNotFound(ResourceNotFoundExceptions exceptions){
         ApiError apiError = ApiError.builder()
                 .status(HttpStatus.NOT_FOUND)
                 .message(exceptions.getMessage())
@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse> handleInternalServerError(Exception exceptions){
+    public ResponseEntity<ApiResponse<?>> handleInternalServerError(Exception exceptions){
         ApiError apiError = ApiError.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .message(exceptions.getMessage())
@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
 
 
 
-    private ResponseEntity<ApiResponse> buildErrorResponseEntity(ApiError apiError) {
+    private ResponseEntity<ApiResponse<?>> buildErrorResponseEntity(ApiError apiError) {
         return new ResponseEntity<>(new ApiResponse<>(apiError),apiError.getStatus());
     }
 

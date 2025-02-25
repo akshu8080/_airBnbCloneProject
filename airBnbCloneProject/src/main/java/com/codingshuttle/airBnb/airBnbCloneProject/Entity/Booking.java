@@ -3,12 +3,12 @@ package com.codingshuttle.airBnb.airBnbCloneProject.Entity;
 import com.codingshuttle.airBnb.airBnbCloneProject.Entity.enums.BookingStatus;
 import com.codingshuttle.airBnb.airBnbCloneProject.Entity.enums.PaymentStatus;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.domain.Page;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -16,6 +16,9 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,9 +51,7 @@ public class Booking {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "payment_id")
-    private Payment payment;
+
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -63,6 +64,9 @@ public class Booking {
 
      )
     private Set<Guest> guests;
+
+    @Column(nullable = false,precision = 10,scale = 2)
+    private BigDecimal amount;
 
 
 
