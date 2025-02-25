@@ -1,14 +1,12 @@
 package com.codingshuttle.airBnb.airBnbCloneProject.stratergy;
 
 import com.codingshuttle.airBnb.airBnbCloneProject.Entity.Inventory;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
- public class BasePricingStrategy implements  PricingStrategy{
+  public  interface PricingStrategy {
 
-    @Override
-    public BigDecimal calculatePrice(Inventory inventory) {
-        return  inventory.getRoom().getBasePrice();
-    }
+    BigDecimal calculatePrice(Inventory inventory);
 }

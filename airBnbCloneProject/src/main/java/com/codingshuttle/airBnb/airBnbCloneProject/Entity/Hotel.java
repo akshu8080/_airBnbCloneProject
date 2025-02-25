@@ -1,5 +1,6 @@
 package com.codingshuttle.airBnb.airBnbCloneProject.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -44,6 +45,7 @@ public class Hotel {
     private boolean active;
 
     @OneToMany(mappedBy = "hotel" )
+    @JsonIgnore
     private List<Room> rooms;
 
     @ManyToOne

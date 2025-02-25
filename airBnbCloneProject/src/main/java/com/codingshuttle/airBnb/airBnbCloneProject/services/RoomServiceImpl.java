@@ -6,13 +6,11 @@ import com.codingshuttle.airBnb.airBnbCloneProject.Entity.Room;
 import com.codingshuttle.airBnb.airBnbCloneProject.exceptions.ResourceNotFoundExceptions;
 import com.codingshuttle.airBnb.airBnbCloneProject.repository.HotelRepository;
 import com.codingshuttle.airBnb.airBnbCloneProject.repository.RoomRepository;
-import jakarta.persistence.Id;
- import jakarta.transaction.Transactional;
+  import jakarta.transaction.Transactional;
  import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
+ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,28 +20,27 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RoomServiceImpl implements RoomService{
 
-    private final RoomRepository roomrepository;
+    private final RoomRepository roomRepository;
     private final ModelMapper modelMapper;
     private final HotelRepository hotelRepository;
     private final InventoryService inventoryService;
 
     @Override
-    public RoomDto createNewRoom(Long hotelId,RoomDto roomDto) {
-        log.info("Creating a new room in Hotel with Id: {}",hotelId);
+    public RoomDto createNewRoom(Long hotelId, RoomDto roomDto) {
+        log.info("Creating a new room in hotel with ID: {}", hotelId);
         Hotel hotel = hotelRepository
                 .findById(hotelId)
-                .orElseThrow(()-> new ResourceNotFoundExceptions("Hotel Not found with Id: "+hotelId));
-
-        Room room = modelMapper.map(roomDto,Room.class);
+                .orElseThrow(() -> new ResourceNotFoundExceptions("Hotel not found with ID: "+hotelId));
+        Room room = modelMapper.map(roomDto, Room.class);
         room.setHotel(hotel);
-        room = roomrepository.save(room);
+        room = roomRepository.save(room);
 
-       if(hotel.isActive()){
+        if (hotel.isActive()) {
             inventoryService.initializeRoomForAYear(room);
-       }
-        return modelMapper.map(room,RoomDto.class);
+        }
 
-     }
+        return modelMapper.map(room, RoomDto.class);
+    }
 
     @Override
     public List<RoomDto> getAllRoomsInHotel(Long hotelId) {
@@ -61,7 +58,7 @@ public class RoomServiceImpl implements RoomService{
     @Override
     public RoomDto getRoomById(Long roomId) {
         log.info("Getting the room with ID: {}", roomId);
-        Room room = roomrepository
+        Room room = roomRepository
                 .findById(roomId)
                 .orElseThrow(() -> new ResourceNotFoundExceptions("Room not found with ID: "+roomId));
         return modelMapper.map(room, RoomDto.class);
@@ -72,14 +69,14 @@ public class RoomServiceImpl implements RoomService{
     @Transactional
     public void deleteRoomById(Long roomId) {
         log.info("Deleting the room with Id: {}",roomId);
-        Room room = roomrepository
+        Room room = roomRepository
                 .findById(roomId)
                 .orElseThrow(() -> new ResourceNotFoundExceptions("Room not found with ID: "+roomId));
 
 
-        inventoryService.deleteFutureInventories(room);
+        inventoryService.deleteAllInventories(room);
 
-        roomrepository.deleteById(roomId);
+        roomRepository.deleteById(roomId);
 
 
 
