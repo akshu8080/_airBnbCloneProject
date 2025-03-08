@@ -6,11 +6,13 @@ import com.codingshuttle.airBnb.airBnbCloneProject.DTO.GuestDto;
 import com.codingshuttle.airBnb.airBnbCloneProject.Entity.*;
 import com.codingshuttle.airBnb.airBnbCloneProject.Entity.enums.BookingStatus;
 import com.codingshuttle.airBnb.airBnbCloneProject.exceptions.ResourceNotFoundExceptions;
+import com.codingshuttle.airBnb.airBnbCloneProject.exceptions.UnAuthorizedException;
 import com.codingshuttle.airBnb.airBnbCloneProject.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
  import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -89,6 +91,11 @@ public class BookingServiceImpl implements BookingService {
 
          Booking  booking =  bookingRepository.findById(bookingId).orElseThrow(() ->
                 new ResourceNotFoundExceptions(" Booking  not found with id: " + bookingId));
+         User user  = getCurrentUser();
+
+         if(!user.equals(booking.getUser())){
+                throw new UnAuthorizedException("Booking does not belongs to this user with id: "+user.getId());
+         }
 
          if(hasBookingExpired(booking)){
              throw new IllegalStateException("Booking has Already Expired ");
@@ -100,7 +107,7 @@ public class BookingServiceImpl implements BookingService {
 
          for (GuestDto guestDto:guestDtoList){
              Guest guest = modelMapper.map(guestDto,Guest.class);
-             guest.setUser(getCurrentUser());
+             guest.setUser(user);
              guest = guestRepository.save(guest);
              booking.getGuests().add(guest);
          }
@@ -116,9 +123,8 @@ public class BookingServiceImpl implements BookingService {
     }
 
     public User getCurrentUser(){
-        User user = new User();
-        user.setId(2L);
-        return user;
+
+        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 }
 
